@@ -2,6 +2,7 @@
   "Ready": "Ready",
   "Scanning": "Scanning...",
   "SelectFolder": "Select folder",
+  "StartScan": "Start scanning",
   "Completed": "Completed",
   "Error": "Error",
   "NoFolder": "No folder selected"

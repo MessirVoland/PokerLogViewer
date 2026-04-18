@@ -9,6 +9,8 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly LogScannerService _scanner = new();
     private readonly FileWatcherService _watcher = new();
     private readonly PokerDataService _data = new();
+    public string SelectFolderText => AppLocalization.Get("SelectFolder");
+    public string StartScanText => AppLocalization.Get("StartScan");
 
     private string _selectedPath;
     public string SelectedPath
@@ -143,6 +145,8 @@ public class MainViewModel : INotifyPropertyChanged
         AppLocalization.Load(lang);
         Status = AppLocalization.Get("Ready");
         OnPropertyChanged(nameof(Status));
+        OnPropertyChanged(nameof(SelectFolderText));
+        OnPropertyChanged(nameof(StartScanText));
     }
 
     public event PropertyChangedEventHandler PropertyChanged;

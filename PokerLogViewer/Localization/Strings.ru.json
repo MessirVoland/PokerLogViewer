@@ -1,7 +1,8 @@
 ﻿{
   "Ready": "Готов",
   "Scanning": "Сканирование...",
-  "SelectFolder": "Выберите папку",
+  "SelectFolder": "Выбрать папку",
+  "StartScan": "Начать сканирование",
   "Completed": "Готово",
   "Error": "Ошибка",
   "NoFolder": "Папка не выбрана"
