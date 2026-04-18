@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Forms;
 
 public class MainViewModel : INotifyPropertyChanged
 {
@@ -34,15 +34,14 @@ public class MainViewModel : INotifyPropertyChanged
     // =========================
     // Хранение данных
     // =========================
-    public ObservableCollection<string> Tables { get; set; } = new();
-    public ObservableCollection<long> HandIds { get; set; } = new();
+    public ObservableCollection<string> Tables { get; } = new();
+    public ObservableCollection<long> HandIds { get; } = new();
 
-    public ObservableCollection<PokerHand> Hands { get; set; } = new();
 
     private readonly Dictionary<string, List<PokerHand>> _data = new();
 
     // =========================
-    // Выбранные элементы
+    // Выбранный стол
     // =========================
     private string _selectedTable;
     public string SelectedTable
@@ -56,6 +55,9 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    // =========================
+    // Выбранная рука
+    // =========================
     private long _selectedHand;
     public long SelectedHand
     {
@@ -69,7 +71,7 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
     // =========================
-    // Детали руки
+    // Детали
     // =========================
     private string _details;
     public string Details
@@ -98,9 +100,7 @@ public class MainViewModel : INotifyPropertyChanged
         var dialog = new FolderBrowserDialog();
 
         if (dialog.ShowDialog() == DialogResult.OK)
-        {
             SelectedPath = dialog.SelectedPath;
-        }
     }
 
     // =========================
@@ -118,21 +118,15 @@ public class MainViewModel : INotifyPropertyChanged
 
         Tables.Clear();
         HandIds.Clear();
-        Hands.Clear();
         _data.Clear();
 
         _scanner.Start(
             SelectedPath,
 
-            // =========================
-            // Рука найдена
-            // =========================
             onHand: hand =>
             {
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    Hands.Add(hand);
-
                     if (!_data.ContainsKey(hand.TableName))
                     {
                         _data[hand.TableName] = new List<PokerHand>();
@@ -143,9 +137,6 @@ public class MainViewModel : INotifyPropertyChanged
                 });
             },
 
-            // =========================
-            // Все файлы обработаны
-            // =========================
             onComplete: count =>
             {
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
@@ -154,9 +145,6 @@ public class MainViewModel : INotifyPropertyChanged
                 });
             },
 
-            // =========================
-            // Ошибка
-            // =========================
             onError: err =>
             {
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
@@ -174,7 +162,11 @@ public class MainViewModel : INotifyPropertyChanged
     {
         HandIds.Clear();
 
-        if (_selectedTable == null) return;
+        if (_selectedTable == null)
+            return;
+
+        if (!_data.ContainsKey(_selectedTable))
+            return;
 
         foreach (var hand in _data[_selectedTable])
         {
@@ -187,12 +179,17 @@ public class MainViewModel : INotifyPropertyChanged
     // =========================
     private void LoadDetails()
     {
-        if (_selectedTable == null) return;
+        if (_selectedTable == null)
+            return;
+
+        if (!_data.ContainsKey(_selectedTable))
+            return;
 
         var hand = _data[_selectedTable]
-            .Find(x => x.HandID == _selectedHand);
+            .FirstOrDefault(x => x.HandID == _selectedHand);
 
-        if (hand == null) return;
+        if (hand == null)
+            return;
 
         Details =
             $"Table: {hand.TableName}\n" +
