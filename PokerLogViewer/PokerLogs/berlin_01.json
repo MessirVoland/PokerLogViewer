@@ -1,0 +1,23 @@
+[
+  {
+    "HandID": 10001,
+    "TableName": "Berlin #01",
+    "Players": ["Jack", "Henry", "Daniel", "Mike"],
+    "Winners": ["Jack"],
+    "WinAmount": "1 000,00$"
+  },
+  {
+    "HandID": 10002,
+    "TableName": "Berlin #01",
+    "Players": ["Anna", "Robert", "Chris"],
+    "Winners": ["Robert"],
+    "WinAmount": "450,50$"
+  },
+  {
+    "HandID": 10003,
+    "TableName": "Berlin #01",
+    "Players": ["Tom", "Jerry", "Spike"],
+    "Winners": ["Tom"],
+    "WinAmount": "780,00$"
+  }
+]

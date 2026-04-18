@@ -1,0 +1,5 @@
+C:/Users/Voland/Desktop/PokerLogViewer/PokerLogViewer/build/CMakeFiles/generate.dir
+C:/Users/Voland/Desktop/PokerLogViewer/PokerLogViewer/build/CMakeFiles/build.dir
+C:/Users/Voland/Desktop/PokerLogViewer/PokerLogViewer/build/CMakeFiles/run.dir
+C:/Users/Voland/Desktop/PokerLogViewer/PokerLogViewer/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Voland/Desktop/PokerLogViewer/PokerLogViewer/build/CMakeFiles/ZERO_CHECK.dir

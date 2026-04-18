@@ -1,0 +1,23 @@
+[
+  {
+    "HandID": 40001,
+    "TableName": "Vegas #01",
+    "Players": ["Ace", "King", "Queen", "Joker"],
+    "Winners": ["Ace"],
+    "WinAmount": "5 000,00$"
+  },
+  {
+    "HandID": 40002,
+    "TableName": "Vegas #01",
+    "Players": ["Mike", "Tony", "Steve", "Bruce"],
+    "Winners": ["Tony"],
+    "WinAmount": "2 300,00$"
+  },
+  {
+    "HandID": 40003,
+    "TableName": "Vegas #01",
+    "Players": ["Loki", "Thor", "Odin"],
+    "Winners": ["Thor"],
+    "WinAmount": "3 750,00$"
+  }
+]
