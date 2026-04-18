@@ -31,14 +31,22 @@
 
             <TextBox Width="400"
                      Text="{Binding SelectedPath, UpdateSourceTrigger=PropertyChanged}"
-                     Margin="0,0,10,0"/>
+                     Margin="5,0,5,0"/>
 
             <Button Content="Выбрать папку"
                     Command="{Binding SelectFolderCommand}"
-                    Margin="0,0,10,0"/>
+                    Margin="5,0,5,0"/>
 
             <Button Content="Начать сканирование"
                     Command="{Binding StartScanCommand}"/>
+
+            <Button Content="RU"
+                    Command="{Binding SetRuCommand}"
+                    Margin="5,0,5,0"/>
+
+            <Button Content="EN"
+                    Command="{Binding SetEnCommand}"
+                    Margin= "5,0,5,0"/>
 
             <TextBlock Text="{Binding Status}"
                        Margin="20,0,0,0"

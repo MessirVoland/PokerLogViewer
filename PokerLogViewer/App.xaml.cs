@@ -9,6 +9,8 @@ namespace PokerLogViewer
         {
             base.OnStartup(e);
 
+            AppLocalization.Load("RU");
+
             var vm = new MainViewModel();
 
             var window = new MainWindow
