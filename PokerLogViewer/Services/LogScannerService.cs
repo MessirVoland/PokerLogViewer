@@ -15,7 +15,8 @@ public class LogScannerService
     {
         _thread = new Thread(() =>
         {
-            int count = 0;
+            int processedFiles = 0;
+            int failedFiles = 0;
 
             try
             {
@@ -25,27 +26,16 @@ public class LogScannerService
                 {
                     try
                     {
-                        var json = File.ReadAllText(file);
-
-                        var hands = JsonSerializer.Deserialize<PokerHand[]>(json);
-
-                        if (hands != null)
-                        {
-                            foreach (var hand in hands)
-                            {
-                                onHand?.Invoke(hand);
-                            }
-                        }
-
-                        count++;
+                        ProcessSingleFile(file, onHand);
+                        processedFiles++;
                     }
                     catch
                     {
-                        // битый файл - просто пропускаем
+                        failedFiles++;
                     }
                 }
 
-                onComplete?.Invoke(count);
+                onComplete?.Invoke(processedFiles);
             }
             catch (Exception ex)
             {
@@ -55,5 +45,34 @@ public class LogScannerService
 
         _thread.IsBackground = true;
         _thread.Start();
+    }
+
+    // =========================
+    // Общий метод обработки файла
+    // (используется и scanner, и watcher)
+    // =========================
+    public void ProcessSingleFile(string filePath, Action<PokerHand> onHand)
+    {
+        string json;
+
+        using (var fs = new FileStream(
+            filePath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.ReadWrite))
+        using (var sr = new StreamReader(fs))
+        {
+            json = sr.ReadToEnd();
+        }
+
+        var hands = JsonSerializer.Deserialize<PokerHand[]>(json);
+
+        if (hands == null)
+            return;
+
+        foreach (var hand in hands)
+        {
+            onHand?.Invoke(hand);
+        }
     }
 }

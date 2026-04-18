@@ -10,6 +10,8 @@ using System.Windows.Input;
 public class MainViewModel : INotifyPropertyChanged
 {
     private readonly LogScannerService _scanner = new();
+    private readonly FileWatcherService _watcher = new();
+
 
     // =========================
     // Путь к папке
@@ -90,6 +92,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         SelectFolderCommand = new RelayCommand(SelectFolder);
         StartScanCommand = new RelayCommand(StartScan);
+        _watcher.OnNewFile = HandleNewFile;
     }
 
     // =========================
@@ -100,7 +103,12 @@ public class MainViewModel : INotifyPropertyChanged
         var dialog = new FolderBrowserDialog();
 
         if (dialog.ShowDialog() == DialogResult.OK)
+        {
             SelectedPath = dialog.SelectedPath;
+
+            _watcher.Stop();
+            _watcher.Start(SelectedPath);
+        }
     }
 
     // =========================
@@ -206,4 +214,21 @@ public class MainViewModel : INotifyPropertyChanged
 
     protected void OnPropertyChanged([CallerMemberName] string name = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    private void HandleNewFile(string filePath)
+    {
+        _scanner.ProcessSingleFile(filePath, hand =>
+        {
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
+            {
+                if (!_data.ContainsKey(hand.TableName))
+                {
+                    _data[hand.TableName] = new List<PokerHand>();
+                    Tables.Add(hand.TableName);
+                }
+
+                _data[hand.TableName].Add(hand);
+            });
+        });
+    }
 }
