@@ -12,10 +12,7 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly LogScannerService _scanner = new();
     private readonly FileWatcherService _watcher = new();
 
-
-    // =========================
     // Путь к папке
-    // =========================
     private string _selectedPath;
     public string SelectedPath
     {
@@ -23,9 +20,7 @@ public class MainViewModel : INotifyPropertyChanged
         set { _selectedPath = value; OnPropertyChanged(); }
     }
 
-    // =========================
     // Статус
-    // =========================
     private string _status = "Готов";
     public string Status
     {
@@ -33,18 +28,28 @@ public class MainViewModel : INotifyPropertyChanged
         set { _status = value; OnPropertyChanged(); }
     }
 
-    // =========================
+    // Поиск
+    private string _searchText;
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            _searchText = value;
+            OnPropertyChanged();
+            ApplyFilter();
+        }
+    }
+
     // Хранение данных
-    // =========================
     public ObservableCollection<string> Tables { get; } = new();
     public ObservableCollection<long> HandIds { get; } = new();
 
 
     private readonly Dictionary<string, List<PokerHand>> _data = new();
+    private readonly Dictionary<string, List<PokerHand>> _fullData = new();
 
-    // =========================
     // Выбранный стол
-    // =========================
     private string _selectedTable;
     public string SelectedTable
     {
@@ -57,9 +62,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    // =========================
     // Выбранная рука
-    // =========================
     private long _selectedHand;
     public long SelectedHand
     {
@@ -72,9 +75,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    // =========================
     // Детали
-    // =========================
     private string _details;
     public string Details
     {
@@ -82,9 +83,7 @@ public class MainViewModel : INotifyPropertyChanged
         set { _details = value; OnPropertyChanged(); }
     }
 
-    // =========================
     // Команды
-    // =========================
     public ICommand SelectFolderCommand { get; }
     public ICommand StartScanCommand { get; }
 
@@ -95,9 +94,7 @@ public class MainViewModel : INotifyPropertyChanged
         _watcher.OnNewFile = HandleNewFile;
     }
 
-    // =========================
     // Выбор папки
-    // =========================
     private void SelectFolder()
     {
         var dialog = new FolderBrowserDialog();
@@ -111,9 +108,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    // =========================
     // Старт сканирования
-    // =========================
     private void StartScan()
     {
         if (string.IsNullOrWhiteSpace(SelectedPath))
@@ -127,6 +122,7 @@ public class MainViewModel : INotifyPropertyChanged
         Tables.Clear();
         HandIds.Clear();
         _data.Clear();
+        _fullData.Clear();
 
         _scanner.Start(
             SelectedPath,
@@ -135,12 +131,18 @@ public class MainViewModel : INotifyPropertyChanged
             {
                 System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
                 {
+                    if (!_fullData.ContainsKey(hand.TableName))
+                    {
+                        _fullData[hand.TableName] = new List<PokerHand>();
+                    }
+
                     if (!_data.ContainsKey(hand.TableName))
                     {
                         _data[hand.TableName] = new List<PokerHand>();
                         Tables.Add(hand.TableName);
                     }
 
+                    _fullData[hand.TableName].Add(hand);
                     _data[hand.TableName].Add(hand);
                 });
             },
@@ -163,9 +165,7 @@ public class MainViewModel : INotifyPropertyChanged
         );
     }
 
-    // =========================
     // Загрузка рук для выбранного стола
-    // =========================
     private void LoadHands()
     {
         HandIds.Clear();
@@ -182,9 +182,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    // =========================
     // Загрузка деталей для выбранной руки
-    // =========================
     private void LoadDetails()
     {
         if (_selectedTable == null)
@@ -207,9 +205,7 @@ public class MainViewModel : INotifyPropertyChanged
             $"Win: {hand.WinAmount}";
     }
 
-    // =========================
     // Уведомление об изменении свойств
-    // =========================
     public event PropertyChangedEventHandler PropertyChanged;
 
     protected void OnPropertyChanged([CallerMemberName] string name = null)
@@ -221,14 +217,54 @@ public class MainViewModel : INotifyPropertyChanged
         {
             System.Windows.Application.Current.Dispatcher.BeginInvoke(() =>
             {
+                if (!_fullData.ContainsKey(hand.TableName))
+                    _fullData[hand.TableName] = new List<PokerHand>();
+
                 if (!_data.ContainsKey(hand.TableName))
                 {
                     _data[hand.TableName] = new List<PokerHand>();
                     Tables.Add(hand.TableName);
                 }
 
+                _fullData[hand.TableName].Add(hand);
                 _data[hand.TableName].Add(hand);
             });
         });
+    }
+
+    private void ApplyFilter()
+    {
+        Tables.Clear();
+        HandIds.Clear();
+        _data.Clear();
+
+        if (string.IsNullOrWhiteSpace(_searchText))
+        {
+            foreach (var kv in _fullData)
+            {
+                Tables.Add(kv.Key);
+                _data[kv.Key] = new List<PokerHand>(kv.Value);
+            }
+            return;
+        }
+
+        var search = _searchText.ToLower();
+
+        foreach (var kv in _fullData)
+        {
+            bool tableMatch = kv.Key.ToLower().Contains(search);
+
+            var filtered = kv.Value
+                .Where(h =>
+                    h.HandID.ToString().Contains(search) ||
+                    h.TableName.ToLower().Contains(search))
+                .ToList();
+
+            if (tableMatch || filtered.Count > 0)
+            {
+                Tables.Add(kv.Key);
+                _data[kv.Key] = filtered.Count > 0 ? filtered : kv.Value;
+            }
+        }
     }
 }

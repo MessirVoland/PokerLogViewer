@@ -24,6 +24,10 @@
         <StackPanel Grid.Row="0" Grid.ColumnSpan="3"
                     Orientation="Horizontal"
                     Margin="0,0,0,10">
+            <TextBox
+                    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                    Width="200"
+                    Margin="5"/>
 
             <TextBox Width="400"
                      Text="{Binding SelectedPath, UpdateSourceTrigger=PropertyChanged}"
